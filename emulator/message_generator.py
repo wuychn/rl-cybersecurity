@@ -33,16 +33,16 @@ def send_messages(agent_host, agent_port, host, port, min_intv, max_intv) -> str
                 # interval = random.randint(min_intv,max_intv)
                 message = f'{message}@@{ip_address}@@{is_user}'
                 _user_server.sendall(message.encode('utf-8'))
-                logging.info(f"{'Пользователь' if is_user else 'Бот'} отправил сообщение на {agent_host}:{agent_port}")
+                logging.info(f"{'User' if is_user else 'Bot'} sent message to {agent_host}:{agent_port}")
                 time.sleep(interval)
                 
         except (ConnectionAbortedError, ConnectionResetError, ConnectionRefusedError) as e:
-            logging.warning(f"Соединение прервано: {e}. Идет переподключение...")
+            logging.warning(f"Connection interrupted: {e}. Reconnecting...")
             if '_user_server' in locals():
                 _user_server.close()
 
         except Exception as e:
-            logging.error(f"Неожиданная ошибка: {e}")
+            logging.error(f"Unexpected error: {e}")
             if '_user_server' in locals():
                 _user_server.close()
             raise

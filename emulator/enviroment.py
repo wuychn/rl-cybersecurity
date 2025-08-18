@@ -24,7 +24,7 @@ class TrafficEnv(gym.Env):
 
         self.load_threshold = load_threshold
         self.hazard_index = hazard_index
-        self.request_buffer = [] # элемент массива (request, bool), true если пакет от нормального пользователя
+        self.request_buffer = [] # array element (request, bool), true if packet is from normal user
         self.blocked_ips = set()
         self.blocked_ip_blocks = set()
 
@@ -53,15 +53,15 @@ class TrafficEnv(gym.Env):
         self.current_data = None
         self.last_message_time = defaultdict(int)
 
-        logging.info(f"Прокси-сервер запущен на {self.proxy_host}:{self.proxy_port}")
-        logging.info(f"Агент подключен к серверу по адресу {self.server_host}:{self.server_port}")
+        logging.info(f"Proxy server started on {self.proxy_host}:{self.proxy_port}")
+        logging.info(f"Agent connected to server at {self.server_host}:{self.server_port}")
 
 
     def get_state(self):
         conn, addr = self.proxy_server.accept()
 
         with conn:
-            logging.info(f'Подключение от {addr}')
+            logging.info(f'Connection from {addr}')
             data = conn.recv(1024).decode('utf-8')
             current_time = time.time()
             if self.mode=='emulator':
@@ -105,7 +105,7 @@ class TrafficEnv(gym.Env):
         
         if action == Action.SERVER_RECIEVE_CURRENT.value:
             self.server.sendall(self.current_data.encode('utf-8'))
-            logging.info(f'Данные отправлены на сервер {self.server_host}:{self.server_port}')
+            logging.info(f'Data sent to server {self.server_host}:{self.server_port}')
 
         elif action == Action.SERVER_DROP_CURRENT.value:
             pass
@@ -166,7 +166,7 @@ class TrafficEnv(gym.Env):
                     return reward
                 
                 else:
-                    return ValueError(f"Uncnown action: {action}")
+                    return ValueError(f"Unknown action: {action}")
                 
             elif action_type == Action_type.MULTILPE_TARGET_ACTION.value:
                 if action == Action.SERVER_BLOCK_CURRENT_ADDRESS_GROUP.value:
@@ -184,7 +184,7 @@ class TrafficEnv(gym.Env):
                     return reward
 
                 else:
-                    return ValueError(f"Uncnown action: {action}")
+                    return ValueError(f"Unknown action: {action}")
         
         else:
             if action_type == Action_type.SINGLE_TARGET_ACTION.value:
@@ -204,7 +204,7 @@ class TrafficEnv(gym.Env):
                     return reward
                 
                 else:
-                    return ValueError(f"Uncnown action: {action}")
+                    return ValueError(f"Unknown action: {action}")
                 
             elif action_type == Action_type.MULTILPE_TARGET_ACTION.value:
                 if action == Action.SERVER_BLOCK_CURRENT_ADDRESS_GROUP.value:
@@ -222,5 +222,5 @@ class TrafficEnv(gym.Env):
                     return reward
 
                 else:
-                    return ValueError(f"Uncnown action: {action}")
+                    return ValueError(f"Unknown action: {action}")
                 

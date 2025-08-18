@@ -8,18 +8,18 @@ from datetime import datetime
 LEARN_EVERY = 4
 
 def train_agent(n_episodes=2000):
-    # Настраиваем логирование
+    # Configure logging
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     log_filename = f'training_log_{timestamp}.txt'
     
-    # Создаем форматтер для логов
+    # Create formatter for logs
     formatter = logging.Formatter('%(asctime)s - %(message)s')
     
-    # Настраиваем файловый handler
+    # Configure file handler
     file_handler = logging.FileHandler(log_filename)
     file_handler.setFormatter(formatter)
     
-    # Настраиваем logger
+    # Configure logger
     logger = logging.getLogger('training')
     logger.setLevel(logging.INFO)
     logger.addHandler(file_handler)

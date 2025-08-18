@@ -1,15 +1,15 @@
 # rl-cybersecurity
 
-Запуск эмулятора:
+Starting the emulator:
 
-- Запуск файла `server.py`
-- Запуск файла `example_emulator.py`
-- Запуск файла `start_generator.py`
+- Start file `server.py`
+- Start file `example_emulator.py`
+- Start file `start_generator.py`
 
-Запуск симулятора:
+Starting the simulator:
 
-- Запуск файла `example_simulator.py`
+- Start file `example_simulator.py`
 
-Файл `training_log_emulator.txt` содержит пример логов при обучение агента в эмуляторе.
+File `training_log_emulator.txt` contains example logs when training an agent in the emulator.
 
-Визуализация: https://github.com/sinsvoegotca/ddos
+Visualization: https://github.com/sinsvoegotca/ddos

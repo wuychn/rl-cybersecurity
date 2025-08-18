@@ -14,7 +14,7 @@ def update_system_metrics():
     MEMORY_USAGE.set(psutil.virtual_memory().percent)
 
 def handle_client(conn, addr):
-    logging.info(f"Подключение от {addr}")
+    logging.info(f"Connection from {addr}")
     while True:
         data = conn.recv(1024)
         if not data:
@@ -23,7 +23,7 @@ def handle_client(conn, addr):
         data = data.decode('utf-8')
         print(data)
 
-        logging.info(f"Получен пакет:\n{data}")
+        logging.info(f"Received packet:\n{data}")
 
         if 'get' in data:
             if data.strip() == 'get state for features':
@@ -40,17 +40,17 @@ def handle_client(conn, addr):
 def start(host='127.0.0.1', port=8080, memory_limit = 512 * 1024 * 1024):
     process = psutil.Process()
     
-    # Проверяем операционную систему
-    if hasattr(process, 'rlimit'):  # Для Unix-систем
+    # Check operating system
+    if hasattr(process, 'rlimit'):  # For Unix systems
         process.rlimit(psutil.RLIMIT_AS, (memory_limit, memory_limit))
     
-    # Ограничение по CPU работает на всех системах
+    # CPU limitation works on all systems
     process.cpu_affinity([0])
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
         s.listen()
-        logging.info(f"Сервер запущен на {host}:{port}")
+        logging.info(f"Server started on {host}:{port}")
 
         while True:
             conn, addr = s.accept()
