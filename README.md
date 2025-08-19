@@ -213,6 +213,11 @@ python start_generator.py
    - 确保所有张量都在同一设备上
    - 检查PyTorch和CUDA版本兼容性
 
+6. **JSON序列化错误** (模型保存时):
+   - 运行 `python test_model_save.py` 验证修复
+   - 确保numpy数据类型正确转换
+   - 检查模型信息文件创建
+
 ### 性能优化
 
 - **GPU训练**: 确保正确安装CUDA以加速训练
@@ -354,6 +359,7 @@ python start_generator.py          # 终端3
 
 # 测试和验证
 python check_installation.py       # 检查安装
+python test_model_save.py          # 测试模型保存功能
 
 # 模型管理
 python load_and_use_model.py       # 加载和使用模型

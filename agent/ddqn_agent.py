@@ -214,18 +214,40 @@ class DoubleQAgent(Agent):
         
         # 保存模型信息
         info_filepath = filepath.replace('.pth', '_info.json')
+        
+        # 确保所有值都是JSON可序列化的
+        def make_json_serializable(obj):
+            """将对象转换为JSON可序列化的格式"""
+            if isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, torch.Tensor):
+                return obj.cpu().numpy().tolist()
+            elif isinstance(obj, (list, tuple)):
+                return [make_json_serializable(item) for item in obj]
+            elif isinstance(obj, dict):
+                return {key: make_json_serializable(value) for key, value in obj.items()}
+            else:
+                return obj
+        
+        # 准备模型信息
+        model_info = {
+            'model_type': 'DDQN',
+            'saved_at': time.strftime('%Y-%m-%d %H:%M:%S'),
+            'parameters': {
+                'observation_space': make_json_serializable(model_state['observation_space_shape']),
+                'action_space': make_json_serializable(model_state['action_space_n']),
+                'gamma': make_json_serializable(model_state['gamma']),
+                'epsilon': make_json_serializable(model_state['epsilon']),
+                'learning_rate': make_json_serializable(model_state['lr'])
+            }
+        }
+        
         with open(info_filepath, 'w', encoding='utf-8') as f:
-            json.dump({
-                'model_type': 'DDQN',
-                'saved_at': time.strftime('%Y-%m-%d %H:%M:%S'),
-                'parameters': {
-                    'observation_space': model_state['observation_space_shape'],
-                    'action_space': model_state['action_space_n'],
-                    'gamma': model_state['gamma'],
-                    'epsilon': model_state['epsilon'],
-                    'learning_rate': model_state['lr']
-                }
-            }, f, indent=2, ensure_ascii=False)
+            json.dump(model_info, f, indent=2, ensure_ascii=False)
         
         print(f"✅ 模型已保存到: {filepath}")
         print(f"📋 模型信息已保存到: {info_filepath}")
@@ -333,14 +355,31 @@ class DoubleQAgent(Agent):
     
     def get_model_info(self):
         """获取模型信息"""
+        def make_json_serializable(obj):
+            """将对象转换为JSON可序列化的格式"""
+            if isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, torch.Tensor):
+                return obj.cpu().numpy().tolist()
+            elif isinstance(obj, (list, tuple)):
+                return [make_json_serializable(item) for item in obj]
+            elif isinstance(obj, dict):
+                return {key: make_json_serializable(value) for key, value in obj.items()}
+            else:
+                return obj
+        
         return {
             'model_type': 'DDQN',
-            'observation_space': self.q_func.fc1.in_features,
-            'action_space': self.q_func.fc3.out_features,
-            'gamma': self.gamma,
-            'epsilon': self.epsilon,
-            'learning_rate': self.optimizer.param_groups[0]['lr'],
+            'observation_space': make_json_serializable(self.q_func.fc1.in_features),
+            'action_space': make_json_serializable(self.q_func.fc3.out_features),
+            'gamma': make_json_serializable(self.gamma),
+            'epsilon': make_json_serializable(self.epsilon),
+            'learning_rate': make_json_serializable(self.optimizer.param_groups[0]['lr']),
             'device': str(device),
-            'total_parameters': sum(p.numel() for p in self.q_func.parameters()),
-            'trainable_parameters': sum(p.numel() for p in self.q_func.parameters() if p.requires_grad)
+            'total_parameters': make_json_serializable(sum(p.numel() for p in self.q_func.parameters())),
+            'trainable_parameters': make_json_serializable(sum(p.numel() for p in self.q_func.parameters() if p.requires_grad))
         }
