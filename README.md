@@ -208,11 +208,101 @@ python start_generator.py
    - 增加内存缓冲区大小
    - 修改奖励函数参数
 
+5. **设备不匹配错误** (CUDA/CPU):
+   - 运行 `python test_device_fix.py` 验证修复
+   - 确保所有张量都在同一设备上
+   - 检查PyTorch和CUDA版本兼容性
+
 ### 性能优化
 
 - **GPU训练**: 确保正确安装CUDA以加速训练
 - **内存管理**: 根据可用RAM调整缓冲区大小
 - **网络延迟**: 开发时使用localhost，生产时使用真实IP
+
+## 模型导出和使用
+
+### 自动模型保存
+训练完成后，系统会自动保存模型到 `models/` 目录：
+- **PyTorch模型** (`.pth`): 包含网络权重、优化器状态和训练参数
+- **ONNX模型** (`.onnx`): 用于生产部署的标准化格式
+- **模型信息** (`.json`): 包含模型元数据和训练统计
+
+### 模型文件结构
+```
+models/
+├── ddqn_model_YYYYMMDD_HHMMSS.pth      # PyTorch模型
+├── ddqn_model_YYYYMMDD_HHMMSS.onnx     # ONNX模型
+└── ddqn_model_YYYYMMDD_HHMMSS_info.json # 模型信息
+```
+
+### 加载和使用模型
+
+#### 方法1: 使用加载脚本
+```bash
+python load_and_use_model.py
+```
+- 自动查找最新模型
+- 测试模型性能
+- 交互式推理演示
+- 性能可视化分析
+
+#### 方法2: 生产环境部署
+```bash
+python deploy_model.py
+```
+- 模型基准测试
+- PyTorch和ONNX性能对比
+- 生产服务模拟
+- 实时推理统计
+
+#### 方法3: 编程方式使用
+```python
+from agent.ddqn_agent import DoubleQAgent
+
+# 创建智能体
+agent = DoubleQAgent(observation_space_shape=7, action_space_n=4)
+
+# 加载训练好的模型
+agent.load_model("models/ddqn_model_latest.pth")
+
+# 进行预测
+state = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+action = agent.choose_action(state)
+```
+
+### 模型部署选项
+
+#### PyTorch部署
+- **优点**: 完整功能、易于调试、支持GPU加速
+- **适用**: 开发环境、研究用途、需要模型修改
+
+#### ONNX部署
+- **优点**: 跨平台、高性能、标准化、易于集成
+- **适用**: 生产环境、边缘设备、多语言调用
+
+### 模型性能优化
+- **批处理推理**: 支持批量输入提高吞吐量
+- **模型量化**: 减少内存占用和推理时间
+- **GPU加速**: 自动检测和使用CUDA设备
+- **缓存优化**: 优化器状态和中间结果缓存
+
+### 模型管理工具
+```bash
+# 列出所有模型
+python model_manager.py
+
+# 显示模型详细信息
+python model_manager.py --info ddqn_model_20241201
+
+# 比较所有模型
+python model_manager.py --compare
+
+# 导出模型摘要
+python model_manager.py --export models_summary.json
+
+# 清理旧模型（保留最新的3个）
+python model_manager.py --cleanup 3
+```
 
 ## 自定义配置
 
@@ -261,6 +351,14 @@ python quick_start.py emulator
 python emulator/server.py          # 终端1
 python example_emulator.py         # 终端2  
 python start_generator.py          # 终端3
+
+# 测试和验证
+python check_installation.py       # 检查安装
+
+# 模型管理
+python load_and_use_model.py       # 加载和使用模型
+python deploy_model.py             # 生产环境部署
+python model_manager.py            # 模型管理工具
 ```
 
 ### 端口配置
