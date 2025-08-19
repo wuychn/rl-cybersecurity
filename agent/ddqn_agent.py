@@ -13,6 +13,17 @@ import random
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(f"🚀 使用设备: {device}")
+if torch.cuda.is_available():
+    print(f"🔧 CUDA版本: {torch.version.cuda}")
+    print(f"🎮 GPU数量: {torch.cuda.device_count()}")
+    print(f"📱 当前GPU: {torch.cuda.get_device_name(0)}")
+
+def ensure_tensor_on_device(tensor, target_device):
+    """确保张量在目标设备上"""
+    if tensor.device != target_device:
+        return tensor.to(target_device)
+    return tensor
 
 class MemoryBuffer(object):
     def __init__(self, max_size):
@@ -96,11 +107,24 @@ class DoubleQAgent(Agent):
     
     def choose_action(self, state):
         rand = np.random.random()
-        state = torch.from_numpy(state).float().unsqueeze(0)
+        
+        # 确保输入状态是numpy数组
+        if isinstance(state, torch.Tensor):
+            state = state.cpu().numpy()
+        
+        # 转换为torch张量并移动到正确设备
+        state_tensor = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        
+        # 验证设备一致性
+        if state_tensor.device != device:
+            print(f"⚠️  警告: 状态张量设备不匹配，从 {state_tensor.device} 移动到 {device}")
+            state_tensor = state_tensor.to(device)
+        
         self.q_func.eval()
         with torch.no_grad():
-            action_values = self.q_func(state)
+            action_values = self.q_func(state_tensor)
         self.q_func.train()
+        
         if rand > self.epsilon or self.is_learning == False: 
             return np.argmax(action_values.cpu().data.numpy())
         else:
@@ -114,6 +138,13 @@ class DoubleQAgent(Agent):
             
         # 1. Choose a sample from past transitions:
         states, actions, rewards, new_states, terminals = self.memory.random_sample(self.batch_size)
+        
+        # 确保所有张量都在正确设备上
+        states = ensure_tensor_on_device(states, device)
+        actions = ensure_tensor_on_device(actions, device)
+        rewards = ensure_tensor_on_device(rewards, device)
+        new_states = ensure_tensor_on_device(new_states, device)
+        terminals = ensure_tensor_on_device(terminals, device)
         
         # 2. Update the target values
         q_next = self.q_func_target(new_states).detach().max(1)[0].unsqueeze(1)
