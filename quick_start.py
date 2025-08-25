@@ -59,13 +59,13 @@ def run_emulator():
         print("1️⃣  启动HTTP服务器...")
         server_process = subprocess.Popen([sys.executable, "emulator/server.py"])
         processes.append(("HTTP服务器", server_process))
-        time.sleep(2)
+        time.sleep(3)  # 增加等待时间
         
         # 启动训练智能体
         print("2️⃣  启动训练智能体...")
         agent_process = subprocess.Popen([sys.executable, "example_emulator.py"])
         processes.append(("训练智能体", agent_process))
-        time.sleep(3)
+        time.sleep(8)  # 增加等待时间，让智能体服务完全启动
         
         # 启动流量生成器
         print("3️⃣  启动流量生成器...")
@@ -78,11 +78,22 @@ def run_emulator():
         
         # 等待用户停止
         while True:
-            time.sleep(1)
+            time.sleep(2)
             # 检查是否有进程意外死亡
             for name, proc in processes:
                 if proc.poll() is not None:
                     print(f"⚠️  {name} 意外停止")
+                    # 尝试重启进程
+                    if name == "训练智能体":
+                        print("🔄 尝试重启训练智能体...")
+                        new_agent = subprocess.Popen([sys.executable, "example_emulator.py"])
+                        processes[1] = ("训练智能体", new_agent)
+                        time.sleep(5)  # 等待重启
+                    elif name == "流量生成器":
+                        print("🔄 尝试重启流量生成器...")
+                        new_generator = subprocess.Popen([sys.executable, "start_generator.py"])
+                        processes[2] = ("流量生成器", new_generator)
+                        time.sleep(3)  # 等待重启
             
     except KeyboardInterrupt:
         print("\n⏹️  正在停止所有进程...")
